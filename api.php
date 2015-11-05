@@ -1,5 +1,4 @@
 <?php
-
 require_once('sender.php');
 
 //$mongo = new MongoClient();
@@ -7,7 +6,6 @@ require_once('sender.php');
 //$images = $db->images;
 //$labels = $db->labels;
 //$page = $pages->findOne(array('_id' => $_REQUEST['_id']));
-
 if (!isset($_REQUEST['op'])) {
 	echo json_encode(array("status" => "error", "description" => "op not specified"));
 	exit;
@@ -43,5 +41,4 @@ default:
 }
 
 //$resp = array("_id" => 1, "labels" => array(array("_id" => 2, box => array(array(1,2),array(3,4)))));
-
 echo json_encode($resp);

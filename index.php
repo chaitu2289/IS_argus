@@ -14,6 +14,12 @@
 		p {
 			color:Maroon;
 		}
+		img {
+                	width:100%;
+                	max-width:800px;
+			height:100%;
+			max-height:500px;
+		}
 	</style>
 </head>
 <body>

@@ -119,7 +119,6 @@ InteractiveTrainer.prototype = {
 				if (xhr.status === 200) {
 					//console.log(xhr.responseText);
 					response =  JSON.parse(xhr.responseText) ;
-					//console.log(response)
 					//var _id = response._id;
 					//var label1 = response.labels.label1._id;
 		    			// File(s) uploaded.
