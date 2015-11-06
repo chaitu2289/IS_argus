@@ -239,6 +239,27 @@ InteractiveTrainer.prototype = {
 			});
 		},
 	
+		select_new_object: function() {
+			var selfObj = this;
+			var img = document.getElementById('target');
+                        var scaled_height = parseInt($('#target').css('height'));
+                        var scaled_width = parseInt($('#target').css('width'));
+			//selfObj.jcrop_api.setSelect([0,0,scaled_width,scaled_height]);
+                        selfObj.hide_all_elements();
+			
+		
+		},
+
+		hide_all_elements: function() {
+
+			for (var i=0; i < this.all_divs.length; i++) {
+                                var inner_div = this.all_divs[i]
+                                inner_div.hide();
+			}
+
+
+		},
+	
 		hide_other_elements: function(index) {
 
 			/*
@@ -284,6 +305,106 @@ InteractiveTrainer.prototype = {
 */
 			}
 			
+		},
+
+		confirm_selection: function() {
+
+			var it = this;
+
+			if (it.is_selected_element >= 0) {
+                                new_coordinates = it.jcrop_api.tellSelect();
+                                new_h = new_coordinates.h;
+                                new_w = new_coordinates.w;
+                                new_x1 = new_coordinates.x;
+                                new_x2 = new_coordinates.x2
+                                new_y1 = new_coordinates.y;
+                                new_y2 = new_coordinates.y2;
+                                if  (it.all_divs[it.is_selected_element].text() !=  $('#tag').val()) {
+                                        if ($('#tag').val() != '') {
+                                                it.all_divs[it.is_selected_element].text(($('#tag').val()));
+                                        }
+                                }
+                                console.log(it.all_divs[it.is_selected_element].text());
+                                it.all_divs[it.is_selected_element].width(new_w).height(new_h).css({
+                                        top: new_y1,
+                                        left: new_x1
+                                })
+                                it.all_divs[it.is_selected_element].show()
+                                it.is_selected_element = -1;
+                                it.jcrop_api.release();
+                                it.imgClick = 0;
+                                it.update_z_values();
+                                for (var i=0; i < it.all_divs.length; i++) {
+                                        it.all_divs[i].show();
+                                }
+                                $("#tag").val("");
+                                return false;
+
+                        }
+			else if (it.imgClick == 1) {
+                                new_coordinates = it.jcrop_api.tellSelect();
+                                _h = new_coordinates.h;
+                                _w = new_coordinates.w;
+                                _x = new_coordinates.x;
+                                _x2 = new_coordinates.x2
+                                _y = new_coordinates.y;
+                                _y2 = new_coordinates.y2;
+
+
+                                $tag = $('#tag').val();
+                                var $div = $('<div />').width(_w).height(_h).css({
+                                        position: 'absolute',
+                                        zIndex: 2000,
+                                        left: _x,
+                                        top: _y,
+                                        border: "2px solid #ff0000",
+                                        background: "rgba(0, 255, 127, 0.3)",
+
+                                });
+                                $div.append("<p>"+$tag+"</p>")
+
+                                $div.attr("id", it.all_divs.length);
+				$div.mousedown(
+
+                                        function(e){
+                                                it.is_selected_element = parseInt($(this).attr('id'));
+                                                $(this).hide();
+                                                var x1 = $(this).css('left');
+                                                x1 = parseInt(x1)
+                                                var y1 = $(this).css('top');
+                                        y1 = parseInt(y1);
+                                        var width = $(this).width()
+                                        var height = $(this).height();
+
+                                        var x2 = x1 + width;
+                                        var y2 = y1 + height;
+
+                                        it.jcrop_api.setSelect([x1,y1,x2,y2]);
+                                        it.hide_other_elements($(this).attr('id'));
+                                        return false;
+                                }
+
+                                );
+
+                                var $img = $('.jcrop-holder');
+
+                                $img.append($div).css({
+                                        position : 'absolute'
+                                });
+                                it.all_divs.push($div);
+                                it.jcrop_api.release();
+                                it.imgClick = 0
+                                it.update_z_values();
+				for (var i=0; i < it.all_divs.length; i++) {
+                                        it.all_divs[i].show();
+                                }
+
+                                $("#tag").val("");
+                                return false;
+                        }
+
+			
+
 		}
 
 };
@@ -294,10 +415,21 @@ function start() {
 	$('#upload-button').click(function(e) {
 		e.preventDefault();
 		it.identify_objects(this);
+		$('#select_new_object').toggle();
+		$('#crop').toggle();
+		
 	});
+
+	$('#select_new_object').click(function(e) {
+		it.select_new_object();
+	})
 
 	
 	$('#crop').click(function(e) {
+
+		it.confirm_selection();
+
+/*
 		console.log(it.is_selected_element);
 		
 		//for(j=0; j<it.all_divs.length; j++) {
@@ -354,7 +486,7 @@ function start() {
 				$div.append("<p>"+$tag+"</p>")
 			
 				$div.attr("id", it.all_divs.length);
-
+*/
 
 				//var selfObj = this;
 /*
@@ -364,6 +496,7 @@ function start() {
 */				
 
 				//var is_selected_element = this.is_selected_element;
+/*
 				$div.mousedown(
 
 					function(e){
@@ -401,6 +534,7 @@ function start() {
 
 			
 		//}
+*/
 	})
 
 	

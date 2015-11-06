@@ -16,7 +16,7 @@
 		}
 		img {
                 	max-height:700px;
-                	max-width:700px;
+                	max-width:500px;
 		}
 	</style>
 </head>
@@ -24,11 +24,12 @@
 
 
 
-	<form id="file-form" action="handler.php" method="POST">
+	<form id="file-form" action="javascript:void(0)" method="POST">
 		<input type="file" id="file-select" onchange="previewFile()" name="test_image"><br>
 		<!--<input type="file" id="file-select" name="test_image"><br>-->
 		<button type="button" id="upload-button" >Show Objects</button>
-		<button type="button" id="crop" >Crop</button>
+		<button type="button" id="select_new_object" style="display: none" >Select new object</button>
+		<button type="button" id="crop" style="display: none">Confirm selection</button>
 		<br> Object label: <input type="text" id="tag"  name="firstname"><br>
 		<img src="#"  alt="Image preview..." id="target">
 	</form>
