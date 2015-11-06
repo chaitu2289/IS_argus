@@ -15,10 +15,8 @@
 			color:Maroon;
 		}
 		img {
-                	width:100%;
-                	max-width:800px;
-			height:100%;
-			max-height:500px;
+                	max-height:700px;
+                	max-width:700px;
 		}
 	</style>
 </head>
@@ -28,12 +26,14 @@
 
 	<form id="file-form" action="handler.php" method="POST">
 		<input type="file" id="file-select" onchange="previewFile()" name="test_image"><br>
+		<!--<input type="file" id="file-select" name="test_image"><br>-->
 		<button type="button" id="upload-button" >Show Objects</button>
 		<button type="button" id="crop" >Crop</button>
 		<br> Object label: <input type="text" id="tag"  name="firstname"><br>
+		<img src="#"  alt="Image preview..." id="target">
 	</form>
 
-	<img src=""  alt="Image preview..." id="target"> 	
+	<!--img src="#"  alt="Image preview..." id="target"--> 	
 
 
 

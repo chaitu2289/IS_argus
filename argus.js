@@ -3,6 +3,7 @@ function InteractiveTrainer(workarea) {
 	this.all_divs = [];
 	this.is_selected_element = -1;
 	this.offset = [];
+	console.log($('#file-form').html())
 /*
 	this.workarea.html(
 '		<div class="col-md-8">'+
@@ -25,19 +26,37 @@ function InteractiveTrainer(workarea) {
 InteractiveTrainer.prototype = {
 
 		show_image: function(labels) {
+			
+			/* arg: labels - coordinates of objects which are 
+			 *		obtained from caffe backend
+			 *
+			 *	This function converts all labels to divs 
+			 *	and defines divs onclick functions
+			 *
+			 */
 	
 			console.log(labels);
-//			var img = $('img', this.workarea);
-//			img.attr('src', 'image.jpg');
-			console.log(typeof(labels));
+			var img = document.getElementById('target');
+			var scaled_height = parseInt($('#target').css('height'));
+			var scaled_width = parseInt($('#target').css('width'));
+                        var natural_width = img.naturalWidth;
+                        var natural_height = img.naturalHeight;
+                        width_factor =  (scaled_width/natural_width);
+                        height_factor =  (scaled_height/natural_height);
+			
 
 			for (i = 0; i < labels.length; i++) {
-			//for (var label in JSON.parse(labels)) {
+			
+				//extract top left coordinates,height, width
 				var _x = labels[i][1][0];
 				var _y = labels[i][1][1]; 
 				var _w = labels[i][1][2];
 				var _h = labels[i][1][3];
-		
+				_x = _x*height_factor;
+				_y = _y*width_factor;
+				_w = _w*width_factor;
+				_h = _h*height_factor;		
+				//create div with all the css properties
 				var $div = $('<div />').width(_w).height(_h).css({
 					position: 'absolute',
 					zIndex: 2000,
@@ -45,18 +64,16 @@ InteractiveTrainer.prototype = {
 					left: _y,
 					border: "2px solid #ff0000",
 					background: "rgba(0, 255, 127, 0.3)",
-					
-							
 				});
 			
 				$div.attr("id", i);
 				$div.append("<p>"+labels[i][2]+"</p>")
-				console.log("Pringint labels " + labels[i]);
 				var selfObj = this;
 
-				//var is_selected_element = this.is_selected_element;
+				/*
+				 * make the box usable(draggable) by Jcrop to update the box when mouse is clicked down in the div element
+				 */
 				$div.mousedown(
-
 					function(e){
 						selfObj.is_selected_element = parseInt($(this).attr('id'));
 						$(this).hide();
@@ -78,8 +95,8 @@ InteractiveTrainer.prototype = {
 				);
 
 				var $img = $('.jcrop-holder');
-				
 				$img.click(function(e) {
+					selfObj.imgClick = 1;
 					console.log("mouse position " + e.pageX + e.pageY);
 				});
 				$img.append($div).css({
@@ -99,8 +116,7 @@ InteractiveTrainer.prototype = {
 		},
 
 		identify_objects: function(frm) {
-			console.log('identify_objects');
-			console.log(frm);
+			console.log('Executing identify_objects');
 			
 			
 			var form = document.getElementById('file-form');
@@ -110,19 +126,18 @@ InteractiveTrainer.prototype = {
 			var formData = new FormData();
 			var file = files[0];
 			var labels = [];
+
 			formData.append('test_image', file, file.name);
+
+			/*
+			 * Create an XMLHttpRequest to communicate with PHP 
+			 */
 
 			var xhr = new XMLHttpRequest();
 			xhr.open('POST', 'api.php?op=identify_objects', false);
-
 			xhr.onload = function () {
 				if (xhr.status === 200) {
-					//console.log(xhr.responseText);
 					response =  JSON.parse(xhr.responseText) ;
-					//var _id = response._id;
-					//var label1 = response.labels.label1._id;
-		    			// File(s) uploaded.
-					uploadButton.innerHTML = 'Upload';
 				} else {
 					alert('An error occurred!');
 				}
@@ -130,7 +145,9 @@ InteractiveTrainer.prototype = {
 
 			xhr.send(formData);	
 			
-
+			/*
+			 * Got "response" from caffe backend and store all coordinates in "labels" datastructure
+			 */
 			
 			var _id = response._id;
 			var _labels = response.labels;
@@ -138,8 +155,6 @@ InteractiveTrainer.prototype = {
 				var label_id = _labels[i]._id;
 				var box = _labels[i].box[0].concat(_labels[i].box[1]);
 				var tag = _labels[i].tag;
-				//item["label_id"] = label_id;
-				//item["box"] = box;
 				labels.push([label_id, box, tag]);
 			}
 			
@@ -147,8 +162,8 @@ InteractiveTrainer.prototype = {
 			// send image to api.php using $.ajax POST request with op "identify_objects"
 			//var labels = { _id: "1", labels: [] }; // get labels from ajax result
 			this.activate_jcrop();
-			this.offset[0] = $('.jcrop-holder').offset().left;
-			this.offset[1] = $('.jcrop-holder').offset().top;
+			//this.offset[0] = $('.jcrop-holder').offset().left;
+			//this.offset[1] = $('.jcrop-holder').offset().top;
 			this.show_image(labels);
 			
 			var $img = $('.jcrop-holder');
@@ -159,6 +174,11 @@ InteractiveTrainer.prototype = {
 		},
 
 		update_z_values: function() {
+
+			/*
+			 * The function incrementes z values of the inner div elements which are 
+			 * fully contained by bigger div elements
+			 */
 			for (var i=0; i<this.all_divs.length; i++) {
 				var outer_div = this.all_divs[i];
 				var outer_div_x = parseInt(outer_div.css('left'));
@@ -178,7 +198,6 @@ InteractiveTrainer.prototype = {
 						var inner_last_corner_y = inner_div_y + inner_div_height;
 						if ((outer_div_x < inner_div_x) && (outer_div_y < inner_div_y) && (outer_last_corner_x > inner_last_corner_x) && (outer_last_corner_y > inner_last_corner_y)) {
 							inner_div.css('z-index', outer_div.css('z-index') + 1);
-							//console.log(parseInt(inner_div.css("z-index")) + 1);
 						} 
 				
 					}					
@@ -186,14 +205,35 @@ InteractiveTrainer.prototype = {
 			}
 
 		},
+		
+		scale_boxes: function() {
+			var img = document.getElementById('target');
+			scaled_width =  img.clientWidth;
+			scaled_height = img.clientHeight;
+			natural_width = img.naturalWidth;
+			natural_height = img.naturalHeight;
+			width_factor = 1 - (scaled_width/natural_width);
+			height_factor = 1 - (scaled_height/natural_height);
+		 	
+			for (var i=0; i<this.all_divs.length; i++) {
+                                var outer_div = this.all_divs[i];
+                                var outer_div_x = parseInt(outer_div.css('left'));
+                                var outer_div_y = parseInt(outer_div.css('top'));
+                                var outer_div_width = outer_div.width();
+                                var outer_div_height = outer_div.height();
+
+				
+			}	
+						
+		},
 
 		
 		activate_jcrop: function() {
 			var self_obj = this;
-
 			jQuery(function($) {
 				$('#target').Jcrop({
  		 		}, function() {
+					console.log('krishna yes');
 					self_obj.jcrop_api = this;
 				});
 			});
@@ -201,6 +241,11 @@ InteractiveTrainer.prototype = {
 	
 		hide_other_elements: function(index) {
 
+			/*
+			 *The function hides all the divs except the div that is selected
+			 *
+			 */
+/*
 			var outer_div = this.all_divs[index];
 			var outer_div_x = parseInt(outer_div.css('left'));
 			var outer_div_y = parseInt(outer_div.css('top'));
@@ -208,8 +253,13 @@ InteractiveTrainer.prototype = {
 			var outer_div_height = outer_div.height();
 			var outer_last_corner_x = outer_div_x + outer_div_width;
 			var outer_last_corner_y = outer_div_y + outer_div_height;
+*/
 			for (var i=0; i < this.all_divs.length; i++) {
-
+				var inner_div = this.all_divs[i]
+				if (index != i) {
+					inner_div.hide();
+				}
+/*
 				if (i!= index) {
 					var inner_div = this.all_divs[i];
 					var inner_div_x = parseInt(inner_div.css('left'));
@@ -231,6 +281,7 @@ InteractiveTrainer.prototype = {
 				
 					}
 				}
+*/
 			}
 			
 		}
@@ -238,8 +289,8 @@ InteractiveTrainer.prototype = {
 };
 
 function start() {
-	
 	it = new InteractiveTrainer($('#workarea'));
+	
 	$('#upload-button').click(function(e) {
 		e.preventDefault();
 		it.identify_objects(this);
@@ -258,8 +309,10 @@ function start() {
 				new_x2 = new_coordinates.x2
 				new_y1 = new_coordinates.y;
 				new_y2 = new_coordinates.y2;
-				if (it.all_divs[it.is_selected_element].text() !=  $('#tag').val()) {
-					it.all_divs[it.is_selected_element].text(($('#tag').val()));
+				if  (it.all_divs[it.is_selected_element].text() !=  $('#tag').val()) {
+					if ($('#tag').val() != '') {
+						it.all_divs[it.is_selected_element].text(($('#tag').val()));
+					}
 				}
 				console.log(it.all_divs[it.is_selected_element].text());
 				it.all_divs[it.is_selected_element].width(new_w).height(new_h).css({
@@ -267,17 +320,18 @@ function start() {
 					left: new_x1
 				})
 				it.all_divs[it.is_selected_element].show()
-				it.is_selected_element = -1
+				it.is_selected_element = -1;
 				it.jcrop_api.release();
+				it.imgClick = 0;
 				it.update_z_values();
 				for (var i=0; i < it.all_divs.length; i++) {	
 					it.all_divs[i].show();
 				}
-				$("tag").val("");
+				$("#tag").val("");
 				return false;
 
 			}
-			else {
+			else if (it.imgClick == 1) {
 				new_coordinates = it.jcrop_api.tellSelect();
 				_h = new_coordinates.h;
 				_w = new_coordinates.w;
@@ -339,7 +393,9 @@ function start() {
 		    		});
 				it.all_divs.push($div);
 				it.jcrop_api.release();
+				it.imgClick = 0
 				it.update_z_values();
+				$("#tag").val("");
 				return false;
 			}
 
@@ -353,11 +409,23 @@ function start() {
 }
 
 function previewFile() {
+	if ($('.jcrop-holder').length) {
+		$('.jcrop-holder').remove();
+	}
+	if ($('#target').is(':hidden')) {
+		$('#target').show()
+		//$('#target').attr('src', '#');
+		if( $('#target').attr('style') )  {
+			console.log('chaitanya');
+                        $('#target').removeAttr('style')
+                }
+
+	}
   	var preview = document.querySelector('img');
   	var file    = document.querySelector('input[type=file]').files[0];
   	var reader  = new FileReader();
 	
-	reader.onloadend = function () {
+	reader.onload = function () {
 		preview.src = reader.result;
 	}
 
