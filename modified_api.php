@@ -20,9 +20,14 @@ error_log("received request with OP $_REQUEST[op]");
 switch($_REQUEST['op']) {
 case 'identify_objects':
 	$image = $_FILES['test_image']['tmp_name'];
-	$simple_sender = new Sender();
-	$resp = $simple_sender->execute($image);
-	$resp = json_decode($resp);
+	$file_name = '"' . $image . '"';
+        $arra = json_encode(array('"image_file_path"' => $file_name));
+        exec("python php2python.py $arra", $output, $return_val);
+        $resp = $output[0];
+
+	//$simple_sender = new Sender();
+	//$resp = $simple_sender->execute($image);
+	//$resp = json_decode($resp);
 	//var_dump(gettype(json_decode($resp)));
 	//var_dump(json_decode($resp));
 	//var_dump(json_encode($resp));
@@ -40,6 +45,4 @@ default:
 	exit;
 }
 
-//$resp = array("_id" => 1, "labels" => array(array("_id" => 2, box => array(array(1,2),array(3,4)))));
-//echo $resp
-echo json_encode($resp);
+echo $resp;

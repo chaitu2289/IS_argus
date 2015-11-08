@@ -134,7 +134,7 @@ InteractiveTrainer.prototype = {
 			 */
 
 			var xhr = new XMLHttpRequest();
-			xhr.open('POST', 'api.php?op=identify_objects', false);
+			xhr.open('POST', 'modified_api.php?op=identify_objects', false);
 			xhr.onload = function () {
 				if (xhr.status === 200) {
 					response =  JSON.parse(xhr.responseText) ;
@@ -421,6 +421,7 @@ function start() {
 	});
 
 	$('#select_new_object').click(function(e) {
+		it.imgClick == 1
 		it.select_new_object();
 	})
 
