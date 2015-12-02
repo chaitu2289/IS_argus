@@ -30,6 +30,8 @@
 		<button type="button" id="upload-button" >Show Objects</button>
 		<button type="button" id="select_new_object" style="display: none" >Select new object</button>
 		<button type="button" id="crop" style="display: none">Confirm selection</button>
+		<button type="button" id="save" style="display: none">Save Image</button>
+		<button type="button" id="learn_features">Learn Features</button>
 		<br> Object label: <input type="text" id="tag"  name="firstname"><br>
 		<img src="#"  alt="Image preview..." id="target">
 	</form>

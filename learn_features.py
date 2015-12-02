@@ -38,15 +38,16 @@ class RpcSender(object):
         return self.response
 
 def init():
-        #print sys.argv[1]
-        inputFromPhp = json.loads(sys.argv[1])
-        file_path = inputFromPhp['image_file_path']
+	#print sys.argv[1]
+	try:
+        	inputFromPhp = json.loads(sys.argv[1])
+	except Exception, e:
+		print str(e)
+		
 	operation = inputFromPhp['operation']
         sender = RpcSender()
-        im = array(Image.open(file_path))
-        msg = {"image_path" : file_path, "image" : im, "operation" : operation}
+        msg = {"operation" : operation}
         json_msg = json.dumps(msg)
-
         response = sender.call(json_msg)
         print response
 

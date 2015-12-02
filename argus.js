@@ -3,7 +3,7 @@ function InteractiveTrainer(workarea) {
 	this.all_divs = [];
 	this.is_selected_element = -1;
 	this.offset = [];
-	console.log($('#file-form').html())
+//	console.log($('#file-form').html())
 /*
 	this.workarea.html(
 '		<div class="col-md-8">'+
@@ -110,9 +110,73 @@ InteractiveTrainer.prototype = {
 	
 		},
 
+		save: function() {
+			console.log('save_image');
+
+			var form = document.getElementById('file-form');
+                        var fileSelect = document.getElementById('file-select');
+                        var uploadButton = document.getElementById('upload-button');
+                        var files = fileSelect.files;
+                        var formData = new FormData();
+                        var file = files[0];
+                        var labels = [];
+			var coordinates = [];
+			for (var i=0; i<this.all_divs.length; i++) {
+				var div_element = this.all_divs[i];
+				//console.log(div_element.text());
+                                var div_x = parseInt(div_element.css('left'));
+                                var div_y = parseInt(div_element.css('top'));
+                                var div_width = div_element.width();
+                                var div_height = div_element.height();
+                                var last_corner_x = div_x + div_width;
+                                var last_corner_y = div_y + div_height;
+				var tag = div_element.text();	
+				var box = new Array([div_x, div_y],[div_width, div_height]);
+				var json_object = {"box": box, "label": tag, "_id": i};
+				coordinates.push(json_object);
+			}
+			for (var j = 0; j < coordinates.length; j++) {
+				var element = coordinates[j];
+				console.log(element);
+			}
+			var data = {"image_id" : 1, "labels": coordinates};
+
+                        formData.append('test_image', file, file.name);
+			formData.append('image_data', JSON.stringify(data));
+
+                        /*
+                         * Create an XMLHttpRequest to communicate with PHP 
+                         */
+			
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'modified_api.php?op=save', false);
+                        xhr.onload = function () {
+                                if (xhr.status === 200) {
+					console.log(xhr.responseText);
+                                        //response =  JSON.parse(xhr.responseText) ;
+                                } else {
+                                        alert('An error occurred!');
+                                }
+                        };
+
+                        xhr.send(formData);
+			
+			
+		},
+		
 		learn_features: function() {
-			console.log('learn_features');
-			// call $.ajax POST on api.php with op "learn_features"
+			var xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'modified_api.php?op=learn_features', false);
+                        xhr.onload = function () {
+                                if (xhr.status === 200) {
+                                        console.log(xhr.responseText);
+                                        //response =  JSON.parse(xhr.responseText) ;
+                                } else {
+                                        alert('An error occurred!');
+                                }
+                        };
+			xhr.send();
+
 		},
 
 		identify_objects: function(frm) {
@@ -137,6 +201,7 @@ InteractiveTrainer.prototype = {
 			xhr.open('POST', 'modified_api.php?op=identify_objects', false);
 			xhr.onload = function () {
 				if (xhr.status === 200) {
+					//console.log(xhr.responseText);
 					response =  JSON.parse(xhr.responseText) ;
 				} else {
 					alert('An error occurred!');
@@ -231,6 +296,7 @@ InteractiveTrainer.prototype = {
 		activate_jcrop: function() {
 			var self_obj = this;
 			jQuery(function($) {
+				console.log($('#target'))
 				$('#target').Jcrop({
  		 		}, function() {
 					console.log('krishna yes');
@@ -343,6 +409,8 @@ InteractiveTrainer.prototype = {
                         }
 			else if (it.imgClick == 1) {
                                 new_coordinates = it.jcrop_api.tellSelect();
+				console.log("logging tell select")
+				console.log(new_coordinates)
                                 _h = new_coordinates.h;
                                 _w = new_coordinates.w;
                                 _x = new_coordinates.x;
@@ -427,117 +495,17 @@ function start() {
 
 	
 	$('#crop').click(function(e) {
-
 		it.confirm_selection();
-
-/*
-		console.log(it.is_selected_element);
-		
-		//for(j=0; j<it.all_divs.length; j++) {
-			if (it.is_selected_element >= 0) {
-				new_coordinates = it.jcrop_api.tellSelect();
-				new_h = new_coordinates.h;
-				new_w = new_coordinates.w;
-				new_x1 = new_coordinates.x;
-				new_x2 = new_coordinates.x2
-				new_y1 = new_coordinates.y;
-				new_y2 = new_coordinates.y2;
-				if  (it.all_divs[it.is_selected_element].text() !=  $('#tag').val()) {
-					if ($('#tag').val() != '') {
-						it.all_divs[it.is_selected_element].text(($('#tag').val()));
-					}
-				}
-				console.log(it.all_divs[it.is_selected_element].text());
-				it.all_divs[it.is_selected_element].width(new_w).height(new_h).css({
-					top: new_y1,
-					left: new_x1
-				})
-				it.all_divs[it.is_selected_element].show()
-				it.is_selected_element = -1;
-				it.jcrop_api.release();
-				it.imgClick = 0;
-				it.update_z_values();
-				for (var i=0; i < it.all_divs.length; i++) {	
-					it.all_divs[i].show();
-				}
-				$("#tag").val("");
-				return false;
-
-			}
-			else if (it.imgClick == 1) {
-				new_coordinates = it.jcrop_api.tellSelect();
-				_h = new_coordinates.h;
-				_w = new_coordinates.w;
-				_x = new_coordinates.x;
-				_x2 = new_coordinates.x2
-				_y = new_coordinates.y;
-				_y2 = new_coordinates.y2;
-			
-				
-				$tag = $('#tag').val();
-				var $div = $('<div />').width(_w).height(_h).css({
-					position: 'absolute',
-					zIndex: 2000,
-					left: _x,
-					top: _y,
-					border: "2px solid #ff0000",
-					background: "rgba(0, 255, 127, 0.3)",
-							
-				});
-				$div.append("<p>"+$tag+"</p>")
-			
-				$div.attr("id", it.all_divs.length);
-*/
-
-				//var selfObj = this;
-/*
-				$div.mouseover().css({
-						cursor: 'move'
-				});
-*/				
-
-				//var is_selected_element = this.is_selected_element;
-/*
-				$div.mousedown(
-
-					function(e){
-						it.is_selected_element = parseInt($(this).attr('id'));
-						$(this).hide();
-						var x1 = $(this).css('left');
-						x1 = parseInt(x1)
-						var y1 = $(this).css('top');
-					y1 = parseInt(y1);
-					var width = $(this).width()
-					var height = $(this).height();
-				
-					var x2 = x1 + width;
-					var y2 = y1 + height;
-				
-					it.jcrop_api.setSelect([x1,y1,x2,y2]);
-					it.hide_other_elements($(this).attr('id'));
-					return false;
-				}
-	
-				);
-
-				var $img = $('.jcrop-holder');
-			
-				$img.append($div).css({
-					position : 'absolute'
-		    		});
-				it.all_divs.push($div);
-				it.jcrop_api.release();
-				it.imgClick = 0
-				it.update_z_values();
-				$("#tag").val("");
-				return false;
-			}
-
-			
-		//}
-*/
+		$('#save').toggle();			
 	})
 
+	$('#save').click(function(e) {
+		it.save();
+	})
+
+	$('#learn_features').click(function(e) {
+		it.learn_features();
+	})
 	
 
 	//$('#learn_features').on('click', this.learn_features);
@@ -547,22 +515,29 @@ function previewFile() {
 	if ($('.jcrop-holder').length) {
 		$('.jcrop-holder').remove();
 	}
+	var preview = document.querySelector('img');
+        var file    = document.querySelector('input[type=file]').files[0];
+        var reader  = new FileReader();
+	reader.onload = function () {
+                preview.src = reader.result;
+        }
 	if ($('#target').is(':hidden')) {
+		jcrop_api.destroy()
 		$('#target').show()
-		//$('#target').attr('src', '#');
+		    //$('#target').attr('src', '#');
 		if( $('#target').attr('style') )  {
 			console.log('chaitanya');
                         $('#target').removeAttr('style')
                 }
 
 	}
-  	var preview = document.querySelector('img');
-  	var file    = document.querySelector('input[type=file]').files[0];
-  	var reader  = new FileReader();
+  	//var preview = document.querySelector('img');
+  	//var file    = document.querySelector('input[type=file]').files[0];
+  	//var reader  = new FileReader();
 	
-	reader.onload = function () {
-		preview.src = reader.result;
-	}
+	//reader.onload = function () {
+	//	preview.src = reader.result;
+	//}
 
 	if (file) {
 		reader.readAsDataURL(file);
@@ -571,4 +546,6 @@ function previewFile() {
 	}
 }
 
-$(document).ready(start);
+$(document).ready(
+start
+);
