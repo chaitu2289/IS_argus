@@ -1,26 +1,16 @@
 function InteractiveTrainer(workarea) {
+
+/*
+Initialising global variables
+all_divs - stores all the bounding box properties
+is_seleced_element - stores the index of current active object in image(crop region)
+jcrop_api - used to integrate Jcrop plugin
+*/
 	this.workarea = $(workarea);
 	this.all_divs = [];
 	this.is_selected_element = -1;
 	this.offset = [];
-//	console.log($('#file-form').html())
-/*
-	this.workarea.html(
-'		<div class="col-md-8">'+
-'			<div style="margin:1em">'+
-'				<img id="target" class="img-responsive">'+
-'			</div>'+
-'		</div>'+
-'		<div class="col-md-4">'+
-'			<div style="margin:1em">'+
-'				<input id="updatebtn" type="button" class="btn" value="Update">'+
-'			</div>'+
-'		</div>'
-	);
-*/
 	this.jcrop_api = null;
-	
-
 }
 
 InteractiveTrainer.prototype = {
@@ -332,43 +322,11 @@ InteractiveTrainer.prototype = {
 			 *The function hides all the divs except the div that is selected
 			 *
 			 */
-/*
-			var outer_div = this.all_divs[index];
-			var outer_div_x = parseInt(outer_div.css('left'));
-			var outer_div_y = parseInt(outer_div.css('top'));
-			var outer_div_width = outer_div.width();
-			var outer_div_height = outer_div.height();
-			var outer_last_corner_x = outer_div_x + outer_div_width;
-			var outer_last_corner_y = outer_div_y + outer_div_height;
-*/
 			for (var i=0; i < this.all_divs.length; i++) {
 				var inner_div = this.all_divs[i]
 				if (index != i) {
 					inner_div.hide();
 				}
-/*
-				if (i!= index) {
-					var inner_div = this.all_divs[i];
-					var inner_div_x = parseInt(inner_div.css('left'));
-					var inner_div_y = parseInt(inner_div.css('top'));
-					var inner_div_width = inner_div.width();
-					var inner_div_height = inner_div.height();
-					var inner_last_corner_x = inner_div_x + inner_div_width;
-					var inner_last_corner_y = inner_div_y + inner_div_height;
-					if ((outer_div_x > inner_div_x) && (outer_div_y > inner_div_y) && (outer_last_corner_x < inner_last_corner_x) && (outer_last_corner_y < inner_last_corner_y)) {
-						inner_div.hide();
-						} 
-				
-						
-
-					if (((outer_div_x < inner_div_x < outer_last_corner_x) && (outer_div_y < inner_div_y < outer_last_corner_y)) || ((outer_div_x < inner_div_x + inner_div_width < outer_last_corner_x) && (outer_div_y < inner_div_y < outer_last_corner_y)) || ((outer_div_x < inner_div_x < outer_last_corner_x) && (outer_div_y < inner_div_y + inner_div_height < outer_div_last_corner_y)) || ((outer_div_x < inner_div_x + inner_div_width < outer_last_corner_x) && (outer_div_y < inner_div_y + inner_div_height < outer_div_last_corner_y)))    {
-				
-
-						inner_div.hide();			
-				
-					}
-				}
-*/
 			}
 			
 		},
