@@ -2,6 +2,12 @@
 
 Prerequisites:
 
+Install Rabbitmq 
+
+composer.json is in the repo. Execute ">composer.phar install"
+
+The above command is used to install "The php-amqplib client library". For any trouble please follow the instructions in "https://www.rabbitmq.com/tutorials/tutorial-one-php.html"
+
 I have used Jcrop Image Cropping plugin. Please include path to Jcrop libraries.
 
 https://github.com/tapmodo/Jcrop.git
