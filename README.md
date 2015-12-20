@@ -1,5 +1,7 @@
 # argus
 
+This repository includes code for the interactive GUI and communicate with backend server using Rabbitmq
+
 Prerequisites:
 
 Install Rabbitmq 
