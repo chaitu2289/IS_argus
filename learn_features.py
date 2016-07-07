@@ -45,8 +45,9 @@ def init():
 		print str(e)
 		
 	operation = inputFromPhp['operation']
+	data = inputFromPhp['data']
         sender = RpcSender()
-        msg = {"operation" : operation}
+        msg = {"operation" : operation, "data": data}
         json_msg = json.dumps(msg)
         response = sender.call(json_msg)
         print response

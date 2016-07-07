@@ -42,9 +42,10 @@ def init():
         inputFromPhp = json.loads(sys.argv[1])
         file_path = inputFromPhp['image_file_path']
 	operation = inputFromPhp['operation']
+	data = inputFromPhp['data']
         sender = RpcSender()
         im = array(Image.open(file_path))
-        msg = {"image_path" : file_path, "image" : im, "operation" : operation}
+        msg = {"image_path" : file_path, "image" : im, "operation" : operation, "model_parameters" : data}
         json_msg = json.dumps(msg)
 
         response = sender.call(json_msg)

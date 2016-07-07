@@ -27,11 +27,12 @@ error_log("received request with OP $_REQUEST[op]");
 $operation_name = $_REQUEST['op'];
 switch($_REQUEST['op']) {
 case 'identify_objects':
+	$data = $_POST['model_selection_parameters'];
 	$image = $_FILES['test_image']['tmp_name'];
 	//var_dump($image);
 	$file_name = '"' . $image . '"';
 	$operation = '"' . $operation_name . '"';
-        $arra = json_encode(array('"image_file_path"' => $file_name, '"operation"' => $operation));
+        $arra = json_encode(array('"image_file_path"' => $file_name, '"data"' => $data, '"operation"' => $operation));
         exec("python php2python.py $arra", $output, $return_val);
         $resp = $output[0];
 
@@ -61,10 +62,13 @@ case 'save':
 	echo $resp;
 	break;
 case 'learn_features':
+	$data = $_POST['finetune_data'];
 	$operation = '"' . $operation_name . '"';
-	$arra = json_encode(array('"operation"' => $operation));
+	$arra = json_encode(array('"operation"' => $operation, '"data"' => $data));
 	exec("python learn_features.py $arra", $output, $return_val);
-	echo "chaitu";
+	$resp = $output[0];
+	echo $resp;
+	#echo "chaitu";
 	break;
 default:
 	echo json_encode(array("status" => "error", "description" => "unknown op '$_REQUEST[op]'"));

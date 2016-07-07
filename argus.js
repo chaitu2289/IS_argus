@@ -11,6 +11,9 @@ jcrop_api - used to integrate Jcrop plugin
 	this.is_selected_element = -1;
 	this.offset = [];
 	this.jcrop_api = null;
+	this.global_iterations = "default";
+	this.global_learning_rate = "default";
+	this.num_sim_images = "default";
 }
 
 InteractiveTrainer.prototype = {
@@ -155,23 +158,77 @@ InteractiveTrainer.prototype = {
 		},
 		
 		learn_features: function() {
+			 var it = this;
+			var formData = new FormData();
+			var iterations = document.getElementById("iterations").value;
+			var learning_rate = document.getElementById("learning_rate").value;
+			var num_images = document.getElementById("num_sim_images").value;
+			console.log("iterations", iterations)
+			console.log("learning_rate", learning_rate)
+			console.log("num_images", num_images)
+			var data = {"iterations" : iterations, "learning_rate": learning_rate, "num_images":num_images};
+			
+			var table = document.getElementById("hyper-parameters");
+			var row = table.insertRow(1);
+			var cell1 = row.insertCell(0);
+			var cell2 = row.insertCell(1);
+			var cell3 = row.insertCell(2);
+			
+			row.onclick = function() {
+				console.log("Row clicked") 
+				$(".highlight").removeClass("highlight");
+			        $(this).addClass("highlight");
+				it.global_iterations =  iterations
+				it.global_learning_rate = learning_rate
+				it.num_sim_images = num_images
+			}
+			
+		
+			cell1.innerHTML = iterations
+			cell2.innerHTML = learning_rate
+			cell3.innerHTML = num_images
+			
+			
+			formData.append('finetune_data', JSON.stringify(data))
+			console.log("formData")	
+			var labels = []
 			var xhr = new XMLHttpRequest();
                         xhr.open('POST', 'modified_api.php?op=learn_features', false);
                         xhr.onload = function () {
                                 if (xhr.status === 200) {
                                         console.log(xhr.responseText);
-                                        //response =  JSON.parse(xhr.responseText) ;
+                                        response =  JSON.parse(xhr.responseText) ;
                                 } else {
                                         alert('An error occurred!');
                                 }
                         };
-			xhr.send();
+			xhr.send(formData);
+
+			console.log(response)
+			/*
+                         * Got "response" from caffe backend and store all coordinates in "labels" datastructure
+                         */
+			var _id = response._id;
+                        var _labels = response.labels;
+                        for (i=0; i<_labels.length; i++) {
+                                var label_id = _labels[i]._id;
+                                var box = _labels[i].box[0].concat(_labels[i].box[1]);
+                                var tag = _labels[i].tag;
+                                labels.push([label_id, box, tag]);
+                        }
+			console.log("labels")
+			console.log(labels)
+			this.all_divs = [];
+			this.show_image(labels);
+			var $img = $('.jcrop-holder');
+                        var selfObj = this;
+                        this.update_z_values();
 
 		},
 
-		identify_objects: function(frm) {
+		identify_objects: function(frm, iterations, learning_rate, num_sim_images) {
 			console.log('Executing identify_objects');
-			
+			this.all_divs = [];	
 			
 			var form = document.getElementById('file-form');
 			var fileSelect = document.getElementById('file-select');
@@ -182,6 +239,8 @@ InteractiveTrainer.prototype = {
 			var labels = [];
 
 			formData.append('test_image', file, file.name);
+			var data = {"iterations" : iterations, "learning_rate": learning_rate, "num_images":num_sim_images};
+			formData.append('model_selection_parameters', JSON.stringify(data))
 
 			/*
 			 * Create an XMLHttpRequest to communicate with PHP 
@@ -217,6 +276,7 @@ InteractiveTrainer.prototype = {
 			// send image to api.php using $.ajax POST request with op "identify_objects"
 			//var labels = { _id: "1", labels: [] }; // get labels from ajax result
 			this.activate_jcrop();
+			//this.all_divs = [];
 			//this.offset[0] = $('.jcrop-holder').offset().left;
 			//this.offset[1] = $('.jcrop-holder').offset().top;
 			this.show_image(labels);
@@ -436,14 +496,20 @@ InteractiveTrainer.prototype = {
 };
 
 function start() {
+	var global_iterations = 100
+	var global_learning_rate = 0.001
+	var num_sim_images = 40
 	it = new InteractiveTrainer($('#workarea'));
 	
 	$('#upload-button').click(function(e) {
+		it.all_divs = []
+		console.log("Global iterations")
+                console.log(it.global_iterations)
 		e.preventDefault();
-		it.identify_objects(this);
+		it.identify_objects(this, it.global_iterations, it.global_learning_rate, it.num_sim_images);
 		$('#select_new_object').toggle();
 		$('#crop').toggle();
-		
+			
 	});
 
 	$('#select_new_object').click(function(e) {
@@ -464,6 +530,8 @@ function start() {
 	$('#learn_features').click(function(e) {
 		it.learn_features();
 	})
+	
+			
 	
 
 	//$('#learn_features').on('click', this.learn_features);
