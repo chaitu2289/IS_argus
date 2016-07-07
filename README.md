@@ -2,7 +2,7 @@
 
 This repository includes code for the interactive GUI and communicate with backend server using Rabbitmq
 
-Prerequisites:
+#####Prerequisites:
 
 Install Rabbitmq 
 
@@ -14,7 +14,7 @@ I have used Jcrop Image Cropping plugin. Please include path to Jcrop libraries.
 
 https://github.com/tapmodo/Jcrop.git
 
-Project Structure:
+#####Project Structure:
 
 argus.js -> Creates interactive backend interface on the image uploaded. Jcrop is integrated.
 
@@ -30,22 +30,22 @@ sender.php        -> Initializes rabbitmq objects to communicate to rabbitmq ser
 
 modified_api.php  -> Received instructions from GUI (learn_features, save, identify_features) and calls corresponding python file to execute.
 
-Software to install:
+#####Software to install:
 
 First install pip for python package manager.
 
 sudo apt-get -y install python-pip
 
-1) jaweson
+#####1) jaweson
 pip install jaweson
 
-2) pika
+#####2) pika
 pip install pika
 
-3) scipy packages
+#####3) scipy packages
 sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
 
-4) Install composer
+#####4) Install composer
 Run this on command line
 
 php -r "readfile('https://getcomposer.org/installer');" > composer-setup.php
