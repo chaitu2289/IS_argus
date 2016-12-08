@@ -34,6 +34,7 @@ case 'identify_objects':
 	$operation = '"' . $operation_name . '"';
         $arra = json_encode(array('"image_file_path"' => $file_name, '"data"' => $data, '"operation"' => $operation));
         exec("python php2python.py $arra", $output, $return_val);
+	error_log("request is resolved");
         $resp = $output[0];
 
 	//$simple_sender = new Sender();

@@ -123,7 +123,8 @@ InteractiveTrainer.prototype = {
                                 var div_height = div_element.height();
                                 var last_corner_x = div_x + div_width;
                                 var last_corner_y = div_y + div_height;
-				var tag = div_element.text();	
+				var tag = div_element.text();
+				console.log(tag);	
 				var box = new Array([div_x, div_y],[div_width, div_height]);
 				var json_object = {"box": box, "label": tag, "_id": i};
 				coordinates.push(json_object);
@@ -142,7 +143,7 @@ InteractiveTrainer.prototype = {
                          */
 			
                         var xhr = new XMLHttpRequest();
-                        xhr.open('POST', 'modified_api.php?op=save', false);
+                        xhr.open('POST', 'http://130.245.169.183/IS_argus/modified_api.php?op=save', false);
                         xhr.onload = function () {
                                 if (xhr.status === 200) {
 					console.log(xhr.responseText);
@@ -193,7 +194,7 @@ InteractiveTrainer.prototype = {
 			console.log("formData")	
 			var labels = []
 			var xhr = new XMLHttpRequest();
-                        xhr.open('POST', 'modified_api.php?op=learn_features', false);
+                        xhr.open('POST', 'http://130.245.169.183/IS_argus/modified_api.php?op=learn_features', false);
                         xhr.onload = function () {
                                 if (xhr.status === 200) {
                                         console.log(xhr.responseText);
@@ -247,11 +248,17 @@ InteractiveTrainer.prototype = {
 			 */
 
 			var xhr = new XMLHttpRequest();
-			xhr.open('POST', 'modified_api.php?op=identify_objects', false);
+			xhr.responseText.scale_dimensions = 700;
+			//xhr.open('POST', 'modified_api.php?op=identify_objects', false);
+			xhr.open('POST', 'http://130.245.169.183/IS_argus/modified_api.php?op=identify_objects', false);
 			xhr.onload = function () {
 				if (xhr.status === 200) {
 					//console.log(xhr.responseText);
 					response =  JSON.parse(xhr.responseText) ;
+					//xhr.responseText.scale_dimensions = 700;
+					//xhr.responseText.scale_dimensions.max_x = 700;
+					//xhr.responseText.scale_dimensions.max_y = 700;
+					console.log(response)
 				} else {
 					alert('An error occurred!');
 				}
@@ -349,7 +356,7 @@ InteractiveTrainer.prototype = {
 				console.log($('#target'))
 				$('#target').Jcrop({
  		 		}, function() {
-					console.log('krishna yes');
+					//console.log('krishna yes');
 					self_obj.jcrop_api = this;
 				});
 			});
@@ -394,7 +401,7 @@ InteractiveTrainer.prototype = {
 		confirm_selection: function() {
 
 			var it = this;
-
+			
 			if (it.is_selected_element >= 0) {
                                 new_coordinates = it.jcrop_api.tellSelect();
                                 new_h = new_coordinates.h;
@@ -513,7 +520,11 @@ function start() {
 	});
 
 	$('#select_new_object').click(function(e) {
-		it.imgClick == 1
+		it.imgClick = 1
+		//TodayDebug:
+		console.log("it.imgClick");
+		console.log(it.imgClick);
+		//
 		it.select_new_object();
 	})
 
